@@ -1,3 +1,8 @@
+import sys
+import os
+
+# Add the mmmai_codebase directory to sys.path
+sys.path.append("/kaggle/working/mmmai_codebase/")
 import math
 import argparse
 import tensorflow as tf
@@ -70,8 +75,8 @@ def load_loss_functions(loss_function_names):
 def load_model_architecture(model_architecture_name):
     """Load loss functions dynamically based on the names from the config."""
     available_models = {
-        "stacked_unets": StackedUNets,
-        "wat_stacked_unets": WATStackedUNets 
+        "stacked_unets": StackedUNets(),
+        "wat_stacked_unets": WATStackedUNets() 
         # Add Generative networks here
         }
     
@@ -177,7 +182,7 @@ def train(config):
 
         # Compile model with updated total_loss function
         model.compile(
-            loss=total_loss(w_comb, b_comb),  # Pass w_comb and b_comb to total_loss
+            loss=total_loss(w_comb, b_comb,n_loss),  # Pass w_comb and b_comb to total_loss
             optimizer=Adam(learning_rate=LEARNING_RATE),
             metrics=[loss_and_metric.ssim_score, 'mse', loss_and_metric.psnr]
         )
