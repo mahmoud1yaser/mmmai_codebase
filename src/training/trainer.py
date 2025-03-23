@@ -191,7 +191,7 @@ def train(config):
         # Load from checkpoint if specified
         if CHECKPOINT_PATH:
             try:
-                model = load_model(CHECKPOINT_PATH,custom_objects={'total_loss':total_loss(w_comb, b_comb,n_loss), 'ssim_score': loss_and_metric.ssim_loss, 'psnr':loss_and_metric.psnr, 'K':K})
+                model = load_model(CHECKPOINT_PATH,custom_objects={'loss':total_loss(w_comb, b_comb,n_loss),'total_loss':total_loss(w_comb, b_comb,n_loss), 'ssim_score': loss_and_metric.ssim_loss, 'psnr':loss_and_metric.psnr, 'K':K})
                 print(f"Model loaded from checkpoint: {CHECKPOINT_PATH}")
             except Exception as e:
                 print(f"Warning: Could not load model from checkpoint: {CHECKPOINT_PATH}. Error: {e}")
