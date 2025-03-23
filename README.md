@@ -129,9 +129,3 @@ To add a new loss function:
 - **Checkpointing**: You can specify a `checkpoint_path` to resume training from a previously saved model.
 - **Callbacks**: The training script supports several callbacks including CSV logging, learning rate scheduling, and model checkpointing.
 - **Dataset Paths**: Ensure the dataset paths in the `data_ids` section are correct for your environment. For example, when running on Kaggle, use the appropriate dataset input paths.
-
----
-
-## License
-
-This code is released under the [MIT License](LICENSE).
