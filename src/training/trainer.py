@@ -219,13 +219,14 @@ def train(config):
             initial_epoch=config["start_epoch"], 
         )
         print("Training completed successfully.")
-    except Exception as e:
-        print(f"Error during model training: {e}")
         print('---------------------------------')
         print('Model Testing ...')
         print('--------------------------------')
         test_dataset = data_loader.generator('test')
         model.evaluate(test_dataset)
+    except Exception as e:
+        print(f"Error during model training: {e}")
+
 
 
 def main():
