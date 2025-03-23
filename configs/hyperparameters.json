@@ -13,6 +13,7 @@
     "checkpoint_path": null,
     "epochs": 10,
     "batch_size": 10,
+    "enable_SAP": true,
     
     "learning_rate": 0.001,
     "height": 256,

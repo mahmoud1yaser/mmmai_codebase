@@ -26,7 +26,8 @@ To train the model, follow the steps below:
      "model_architecture": "wat_stacked_unets",  # Select the model architecture (e.g., wat_stacked_unets or stacked_unets)
      "checkpoint_path": null,  # Optional: Provide the path to a checkpoint if resuming training
      "epochs": 10,  # Number of epochs for training
-     "batch_size": 10  # Batch size for training
+     "batch_size": 10,  # Batch size for training
+     "enable_SAP": true # set enable_SAP = false if using other generative models
    }
    ```
 

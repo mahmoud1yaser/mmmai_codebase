@@ -135,7 +135,7 @@ def train(config):
         # Load data using data loader config
         data_loader_config = config['data_loader']
         data_loader = load_data_loader(config['dataset'], BATCH_SIZE, config['data_ids'], data_loader_config)
-        train_dataset = data_loader.generator('train') # set enable_SAP = False if using other generative models
+        train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
 
         if len(input_losses) > 1:
