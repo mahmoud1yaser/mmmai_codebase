@@ -7,7 +7,8 @@
     },
     "loss_functions": [
       "ssim_loss",
-      "perceptual_loss"
+      "perceptual_loss",
+      "mae_loss"
     ],
     "model_architecture": "wat_stacked_unets",
     "checkpoint_path": null,
@@ -19,7 +20,7 @@
     "height": 256,
     "width": 256,
     "data_loader": {
-      "split_ratio": [0.01, 0.98, 0.01],
+      "split_ratio": [0.7, 0.2, 0.1],
       "view": "Axial",
       "crop": false,
       "split_json_path": null
