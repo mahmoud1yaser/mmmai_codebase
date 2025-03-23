@@ -221,11 +221,11 @@ def train(config):
         print("Training completed successfully.")
     except Exception as e:
         print(f"Error during model training: {e}")
-    print('---------------------------------')
-    print('Model Testing ...')
-    print('--------------------------------')
-    test_dataset = data_loader.generator('test')
-    model.evaluate(test_dataset)
+        print('---------------------------------')
+        print('Model Testing ...')
+        print('--------------------------------')
+        test_dataset = data_loader.generator('test')
+        model.evaluate(test_dataset)
 
 
 def main():
