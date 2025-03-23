@@ -12,6 +12,7 @@ from tqdm import tqdm
 from tensorflow.keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.models import load_model
+from tensorflow.keras import backend as K
 
 from src.utils.losses import Losses 
 from networks.wat_stacked_unets import WATStackedUNets
@@ -190,7 +191,7 @@ def train(config):
         # Load from checkpoint if specified
         if CHECKPOINT_PATH:
             try:
-                model = load_model(CHECKPOINT_PATH)
+                model = load_model(CHECKPOINT_PATH,custom_objects={'total_loss':total_loss, 'ssim_score': loss_and_metric.ssim_loss, 'psnr':loss_and_metric.psnr, 'K':K})
                 print(f"Model loaded from checkpoint: {CHECKPOINT_PATH}")
             except Exception as e:
                 print(f"Warning: Could not load model from checkpoint: {CHECKPOINT_PATH}. Error: {e}")
