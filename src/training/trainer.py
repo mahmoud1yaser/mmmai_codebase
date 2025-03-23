@@ -214,7 +214,7 @@ def train(config):
             epochs=NB_EPOCH,
             verbose=1,
             validation_data=validation_dataset,
-            callbacks=[csv_logger, reduce_lr, model_checkpoint]
+            callbacks=[csv_logger, reduce_lr, model_checkpoint],
             initial_epoch=config["start_epoch"], 
         )
         print("Training completed successfully.")
