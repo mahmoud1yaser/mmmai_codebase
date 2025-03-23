@@ -7,14 +7,14 @@
     },
     "loss_functions": [
       "ssim_loss",
-      "perceptual_loss",
-      "mae_loss"
+      "perceptual_loss"
     ],
     "model_architecture": "wat_stacked_unets",
     "checkpoint_path": null,
     "epochs": 10,
     "batch_size": 10,
     "enable_SAP": true,
+    "start_epoch":0,
     
     "learning_rate": 0.001,
     "height": 256,
