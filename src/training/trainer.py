@@ -238,3 +238,29 @@ def train(config):
         model.evaluate(test_dataset)
     except Exception as e:
         print(f"Error during model training: {e}")
+def main():
+    """Main function to parse arguments and execute training."""
+    parser = argparse.ArgumentParser(description="Train WAT U-Net model.")
+    parser.add_argument('-c', '--config', type=str, required=True, help="Path to the JSON configuration file.")
+    parser.add_argument('-d', '--dataset', type=str, help="Path to the dataset.")
+    parser.add_argument('--batch_size', type=int, help="Batch size for training.")
+    parser.add_argument('--learning_rate', type=float, help="Learning rate for training.")
+    parser.add_argument('--epochs', type=int, help="Number of epochs.")
+    parser.add_argument('--height', type=int, help="Height of the input images.")
+    parser.add_argument('--width', type=int, help="Width of the input images.")
+    parser.add_argument('--split_ratio', type=float, nargs=3, help="Train, validation, test split ratio.")
+    parser.add_argument('--view', type=str, help="View for data (e.g., Axial).")
+    parser.add_argument('--crop', type=bool, help="Whether to crop the images.")
+    parser.add_argument('--split_json_path', type=str, help="Path to the split json file.")
+    parser.add_argument('--checkpoint_path', type=str, help="Path to the checkpoint for resuming training.")
+    args = parser.parse_args()
+
+    # Load and update config
+    config = load_hyperparameters(args.config)
+    config = update_hyperparameters_with_args(config, args)
+
+    # Train the model
+    train(config)
+
+if __name__ == "__main__":
+    main()
