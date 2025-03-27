@@ -123,9 +123,52 @@ To add a new loss function:
 2. The script will automatically load the dataset, model, and loss functions from the configuration file and begin training.
 
 ---
+## Monitoring Training with TensorBoard
+
+The training process automatically logs metrics and visualizations to TensorBoard for real-time monitoring.
+
+### Metrics Tracked
+- **Losses**: Training & validation loss for each configured loss function
+- **Metrics**: SSIM, PSNR, and other evaluation metrics
+- **Learning Rate**: Current learning rate value (especially useful with schedulers)
+- **Images**: Sample inputs, targets, and predictions (logged periodically)
+
+### Launching TensorBoard
+
+1. During or after training, run:
+   ```bash
+   tensorboard --logdir=logs/tensorboard
+2. Open your browser to
+   ```bash
+   http://localhost:6006/
+### Launching TensorBoard on Kaggle
+Using Kaggle, you can't access localhost, so that we can use ngrok
+1. Download ngrok 
+   ```bash
+   !wget https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz
+   !tar xf ./ngrok-v3-stable-linux-amd64.tgz -C /usr/local/bin
+2. Authenticate ngrok using your access token
+   ```bash
+   !ngrok authtoken [Your access token]
+3. Launches TensorBoard and Ngrok simultaneously using Python's multiprocessing:
+
+   ```python
+   import os
+   import multiprocessing
+ 
+   pool = multiprocessing.Pool(processes = 10)
+   results_of_processes = [pool.apply_async(os.system, args=(cmd, ), callback = None )
+                        for cmd in [
+                        f"tensorboard --logdir /kaggle/working/logs --load_fast=false --host 0.0.0.0 --port 6006 &",
+                        "/usr/local/bin/ngrok http 6006 &"
+                        ]]
+4. Retrieves the public Ngrok URL from a locally running Ngrok instance:
+   ```bash
+   ! curl -s http://localhost:4040/api/tunnels | python3 -c \
+    "import sys, json; print(json.load(sys.stdin)['tunnels'][0]['public_url'])"
 
 ## Additional Notes
 
 - **Checkpointing**: You can specify a `checkpoint_path` to resume training from a previously saved model.
-- **Callbacks**: The training script supports several callbacks including CSV logging, learning rate scheduling, and model checkpointing.
+- **Callbacks**: The training script supports several callbacks including CSV logging, learning rate scheduling, model checkpointing, and TensorBoard integration.
 - **Dataset Paths**: Ensure the dataset paths in the `data_ids` section are correct for your environment. For example, when running on Kaggle, use the appropriate dataset input paths.
