@@ -105,7 +105,7 @@ def train(config):
     NB_EPOCH = config['epochs']
     WEIGHTS_PATH = config['weights_path']
     CHECKPOINT_PATH = config['checkpoint_path']
-    
+    SAVE_BEST = config["model_checkpoint"]["filename_pattern"]
     try:
         input_losses = load_loss_functions(config['loss_functions'])
         model_architecture = load_model_architecture(config['model_architecture'])
@@ -140,7 +140,7 @@ def train(config):
         callbacks = [
             CSVLogger(f'{WEIGHTS_PATH}_Loss_Acc.csv'),
             LearningRateScheduler(lambda epoch: exponential_lr(epoch, LEARNING_RATE)),
-            ModelCheckpoint(f'{WEIGHTS_PATH}model_best.h5', save_best_only=True, monitor='val_loss'),
+            ModelCheckpoint(f'{WEIGHTS_PATH}{SAVE_BEST}.h5', save_best_only=True, monitor='val_loss'),
             TensorBoard(log_dir=log_dir)
         ]
 
