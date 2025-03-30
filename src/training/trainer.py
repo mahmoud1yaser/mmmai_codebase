@@ -161,7 +161,7 @@ def train(config):
 
 def main():
     """Main function to parse arguments and execute training."""
-    parser = argparse.ArgumentParser(description="Train WAT U-Net model.")
+    parser = argparse.ArgumentParser(description="Train model.")
     parser.add_argument('-c', '--config', type=str, required=True, help="Path to the JSON configuration file.")
     parser.add_argument('-d', '--dataset', type=str, help="Path to the dataset.")
     args = parser.parse_args()
