@@ -144,46 +144,43 @@ def train(config):
         train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
 
-        if len(input_losses) > 1:
 
-            # Calculate adaptive weights and biases
-            try:
-                losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
-                n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
+        # Calculate adaptive weights and biases
+        try:
+            losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
+            n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
 
-                print(f"Number of losses: {n_loss}")
-                print(f"Weight (w_comb): {w_comb}")
-                print(f"Bias (b_comb): {b_comb}")
-            except ValueError as e:
-                print(f"Error: {e}")
-                # Fallback to default values if adaptive normalization fails
-                w_comb = [1] * len(input_losses)  # Ensure w_comb has the correct length
-                b_comb = [0] * len(input_losses)  # Ensure b_comb has the correct length
+            print(f"Number of losses: {n_loss}")
+            print(f"Weight (w_comb): {w_comb}")
+            print(f"Bias (b_comb): {b_comb}")
+        except ValueError as e:
+            print(f"Error: {e}")
+            # Fallback to default values if adaptive normalization fails
+            w_comb = [1] * len(input_losses)  # Ensure w_comb has the correct length
+            b_comb = [0] * len(input_losses)  # Ensure b_comb has the correct length
 
-            def total_loss(w_comb, b_comb, n_loss):
-                """Wrapper function to create a total_loss function with dynamic w_comb and b_comb."""
-                def loss(y_true, y_pred):
-                    """Custom loss function combining perceptual and SSIM losses."""
-                    losses = []
-                    for i, loss_fn in enumerate(input_losses):
-                        # Compute each loss (e.g., perceptual and SSIM)
-                        current_loss = loss_fn(y_true, y_pred)
-                        
-                        # Apply the weight and bias for the current loss
-                        scaled_loss = current_loss * w_comb[i]
-                        adjusted_loss = scaled_loss + b_comb[i]
-                        losses.append(adjusted_loss)
+        def total_loss(w_comb, b_comb, n_loss):
+            """Wrapper function to create a total_loss function with dynamic w_comb and b_comb."""
+            def loss(y_true, y_pred):
+                """Custom loss function combining perceptual and SSIM losses."""
+                losses = []
+                for i, loss_fn in enumerate(input_losses):
+                    # Compute each loss (e.g., perceptual and SSIM)
+                    current_loss = loss_fn(y_true, y_pred)
                     
-                    total = sum(losses) / n_loss  # Normalize by the number of losses
-                    return total
+                    # Apply the weight and bias for the current loss
+                    scaled_loss = current_loss * w_comb[i]
+                    adjusted_loss = scaled_loss + b_comb[i]
+                    losses.append(adjusted_loss)
+                
+                total = sum(losses) / n_loss  # Normalize by the number of losses
+                return total
 
-                return loss
-        else:
-            total_loss = input_losses[0]
+            return loss
 
         # Compile model with updated total_loss function
         model.compile(
-            loss=total_loss(w_comb, b_comb,n_loss),  # Pass w_comb and b_comb to total_loss
+            loss=total_loss(w_comb, b_comb, n_loss),  # Pass w_comb and b_comb to total_loss
             optimizer=Adam(learning_rate=LEARNING_RATE),
             metrics=[loss_and_metric.ssim_score, 'mse', loss_and_metric.psnr]
         )
