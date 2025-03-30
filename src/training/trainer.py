@@ -1,13 +1,11 @@
 import sys
 import os
-
-# Add the mmmai_codebase directory to sys.path
-sys.path.append("/kaggle/working/mmmai_codebase/")
 import math
 import argparse
 import tensorflow as tf
 import numpy as np
 import json
+import logging
 from tqdm import tqdm
 from tensorflow.keras.callbacks import CSVLogger, LearningRateScheduler, ModelCheckpoint, TensorBoard
 from tensorflow.keras.optimizers import Adam
@@ -20,44 +18,24 @@ from networks.stacked_unets import StackedUNets
 from src.data.dataloader import DataLoader
 from src.utils.adaptive_losses import AdaMultiLossesNorm
 
+# Configure logging
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 # Initialize loss object
 loss_and_metric = Losses()
 ada_multi_losses_norm = AdaMultiLossesNorm()
 
 def load_hyperparameters(config_path):
     """Load hyperparameters from a JSON configuration file."""
+    logging.info("Loading configuration file...")
     with open(config_path, 'r') as f:
         config = json.load(f)
-    return config
-
-def update_hyperparameters_with_args(config, args):
-    """Update hyperparameters with the provided command line arguments."""
-    if args.dataset:
-        config['dataset'] = args.dataset
-    if args.batch_size:
-        config['batch_size'] = args.batch_size
-    if args.learning_rate:
-        config['learning_rate'] = args.learning_rate
-    if args.epochs:
-        config['epochs'] = args.epochs
-    if args.height:
-        config['height'] = args.height
-    if args.width:
-        config['width'] = args.width
-    if args.split_ratio:
-        config['data_loader']['split_ratio'] = args.split_ratio
-    if args.view:
-        config['data_loader']['view'] = args.view
-    if args.crop is not None:
-        config['data_loader']['crop'] = args.crop
-    if args.split_json_path:
-        config['data_loader']['split_json_path'] = args.split_json_path
-    if args.checkpoint_path:
-        config['checkpoint_path'] = args.checkpoint_path
+    logging.info("Hyperparameters loaded successfully.")
     return config
 
 def load_loss_functions(loss_function_names):
     """Load loss functions dynamically based on the names from the config."""
+    logging.info("Loading loss functions...")
     available_losses = {
         "ssim_loss": loss_and_metric.ssim_loss,
         "perceptual_loss": loss_and_metric.perceptual_loss,
@@ -71,21 +49,22 @@ def load_loss_functions(loss_function_names):
         else:
             raise ValueError(f"Loss function {loss_name} is not recognized.")
     
+    logging.info("Loss functions loaded successfully.")
     return losses
 
 def load_model_architecture(model_architecture_name):
-    """Load loss functions dynamically based on the names from the config."""
+    """Load model architecture dynamically based on the name from the config."""
+    logging.info(f"Loading model architecture: {model_architecture_name}...")
     available_models = {
         "stacked_unets": StackedUNets(),
-        "wat_stacked_unets": WATStackedUNets() 
-        # Add Generative networks here
-        }
+        "wat_stacked_unets": WATStackedUNets()
+    }
     
-    for model_name in available_models:
-        if model_name in model_architecture_name:
-            return available_models[model_name]
-        else:
-            raise ValueError(f"Model {model_name} is not recognized.")
+    if model_architecture_name in available_models:
+        logging.info(f"Model architecture '{model_architecture_name}' loaded successfully.")
+        return available_models[model_architecture_name]
+    else:
+        raise ValueError(f"Model '{model_architecture_name}' is not recognized.")
         
 
 def exponential_lr(epoch, LEARNING_RATE):
@@ -93,10 +72,11 @@ def exponential_lr(epoch, LEARNING_RATE):
     if epoch < 10:
         return LEARNING_RATE
     else:
-        return LEARNING_RATE * math.exp(0.1 * (10 - epoch))  # lr decreases exponentially by a factor of 10
+        return LEARNING_RATE * math.exp(0.1 * (10 - epoch))
     
 def load_data_loader(dataset_path, batch_size, data_ids, data_loader_config):
     """Load and split data using DataLoader based on configuration."""
+    logging.info("Initializing DataLoader...")
     try:
         data_loader = DataLoader(
             data_path=dataset_path,
@@ -108,18 +88,16 @@ def load_data_loader(dataset_path, batch_size, data_ids, data_loader_config):
             split_json_path=data_loader_config['split_json_path']
         )
         data_loader.split_data()
+        logging.info("DataLoader initialized and data split successfully.")
         return data_loader
-    except KeyError:
-        raise ValueError(f"Dataset path {dataset_path} not found in data_ids.")
     except Exception as e:
-        raise RuntimeError(f"Error loading data: {e}")
+        logging.error(f"Error loading data: {e}")
+        raise
 
 def train(config):
     """Train the model."""
-    print('---------------------------------')
-    print('Model Training ...')
-    print('---------------------------------')
-
+    logging.info('Starting model training...')
+    
     HEIGHT = config['height']
     WIDTH = config['width']
     LEARNING_RATE = config['learning_rate']
@@ -129,134 +107,70 @@ def train(config):
     CHECKPOINT_PATH = config['checkpoint_path']
     
     try:
-        # Load loss functions from config
         input_losses = load_loss_functions(config['loss_functions'])
-
-        # Select model architecture
         model_architecture = load_model_architecture(config['model_architecture'])
         
-        # Initialize model
         model = model_architecture.Correction_Multi_input(HEIGHT, WIDTH)
         
-        # Load data using data loader config
         data_loader_config = config['data_loader']
         data_loader = load_data_loader(config['dataset'], BATCH_SIZE, config['data_ids'], data_loader_config)
+        
         train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
+        
+        losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
+        n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
+        
+        def total_loss(y_true, y_pred):
+            losses = [fn(y_true, y_pred) * w_comb[i] + b_comb[i] for i, fn in enumerate(input_losses)]
+            return sum(losses) / n_loss
 
-
-        # Calculate adaptive weights and biases
-        try:
-            losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
-            n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
-
-            print(f"Number of losses: {n_loss}")
-            print(f"Weight (w_comb): {w_comb}")
-            print(f"Bias (b_comb): {b_comb}")
-        except ValueError as e:
-            print(f"Error: {e}")
-            # Fallback to default values if adaptive normalization fails
-            w_comb = [1] * len(input_losses)  # Ensure w_comb has the correct length
-            b_comb = [0] * len(input_losses)  # Ensure b_comb has the correct length
-
-        def total_loss(w_comb, b_comb, n_loss):
-            """Wrapper function to create a total_loss function with dynamic w_comb and b_comb."""
-            def loss(y_true, y_pred):
-                """Custom loss function combining perceptual and SSIM losses."""
-                losses = []
-                for i, loss_fn in enumerate(input_losses):
-                    # Compute each loss (e.g., perceptual and SSIM)
-                    current_loss = loss_fn(y_true, y_pred)
-                    
-                    # Apply the weight and bias for the current loss
-                    scaled_loss = current_loss * w_comb[i]
-                    adjusted_loss = scaled_loss + b_comb[i]
-                    losses.append(adjusted_loss)
-                
-                total = sum(losses) / n_loss  # Normalize by the number of losses
-                return total
-
-            return loss
-
-        # Compile model with updated total_loss function
         model.compile(
-            loss=total_loss(w_comb, b_comb, n_loss),  # Pass w_comb and b_comb to total_loss
+            loss=total_loss,
             optimizer=Adam(learning_rate=LEARNING_RATE),
             metrics=[loss_and_metric.ssim_score, 'mse', loss_and_metric.psnr]
         )
 
-        # Load from checkpoint if specified
         if CHECKPOINT_PATH:
-            try:
-                model = load_model(CHECKPOINT_PATH,custom_objects={'loss':total_loss(w_comb, b_comb,n_loss),'total_loss':total_loss(w_comb, b_comb,n_loss), 'ssim_score': loss_and_metric.ssim_loss, 'psnr':loss_and_metric.psnr, 'K':K})
-                print(f"Model loaded from checkpoint: {CHECKPOINT_PATH}")
-            except Exception as e:
-                print(f"Warning: Could not load model from checkpoint: {CHECKPOINT_PATH}. Error: {e}")
+            model = load_model(CHECKPOINT_PATH, custom_objects={'total_loss': total_loss})
 
-        # Callbacks
         log_dir = os.path.join(WEIGHTS_PATH, "logs")
         os.makedirs(log_dir, exist_ok=True)
         
-        tensorboard_callback = TensorBoard(
-            log_dir=log_dir,
-            histogram_freq=1,
-            write_graph=True,
-            write_images=True,
-            update_freq='epoch',
-            profile_batch=2
-        )
-        
-        csv_logger = CSVLogger(f'{WEIGHTS_PATH}_Loss_Acc.csv', append=True, separator=',')
-        reduce_lr = LearningRateScheduler(lambda epoch: exponential_lr(epoch, LEARNING_RATE))
-        checkpoint_path = f'{WEIGHTS_PATH}WAT_style_stacked_{{epoch:02d}}_val_loss_{{val_loss:.4f}}.h5'
-        model_checkpoint = ModelCheckpoint(
-            checkpoint_path,
-            monitor='val_loss',
-            save_best_only=False,
-            save_weights_only=False,
-            mode='min',
-            verbose=1
-        )
+        callbacks = [
+            CSVLogger(f'{WEIGHTS_PATH}_Loss_Acc.csv'),
+            LearningRateScheduler(lambda epoch: exponential_lr(epoch, LEARNING_RATE)),
+            ModelCheckpoint(f'{WEIGHTS_PATH}model_best.h5', save_best_only=True, monitor='val_loss'),
+            TensorBoard(log_dir=log_dir)
+        ]
 
-        # Train model
-        history = model.fit(
+        model.fit(
             train_dataset,
             epochs=NB_EPOCH,
-            verbose=1,
             validation_data=validation_dataset,
-            callbacks=[csv_logger, reduce_lr, model_checkpoint, tensorboard_callback],
-            initial_epoch=config["start_epoch"], 
+            callbacks=callbacks
         )
-        print("Training completed successfully.")
-        print('---------------------------------')
-        print('Model Testing ...')
-        print('--------------------------------')
+        
+        logging.info("Training completed successfully.")
+        
         test_dataset = data_loader.generator('test')
         model.evaluate(test_dataset)
+        
     except Exception as e:
-        print(f"Error during model training: {e}")
+        logging.error(f"Error during model training: {e}")
+
 def main():
     """Main function to parse arguments and execute training."""
     parser = argparse.ArgumentParser(description="Train WAT U-Net model.")
     parser.add_argument('-c', '--config', type=str, required=True, help="Path to the JSON configuration file.")
     parser.add_argument('-d', '--dataset', type=str, help="Path to the dataset.")
-    parser.add_argument('--batch_size', type=int, help="Batch size for training.")
-    parser.add_argument('--learning_rate', type=float, help="Learning rate for training.")
-    parser.add_argument('--epochs', type=int, help="Number of epochs.")
-    parser.add_argument('--height', type=int, help="Height of the input images.")
-    parser.add_argument('--width', type=int, help="Width of the input images.")
-    parser.add_argument('--split_ratio', type=float, nargs=3, help="Train, validation, test split ratio.")
-    parser.add_argument('--view', type=str, help="View for data (e.g., Axial).")
-    parser.add_argument('--crop', type=bool, help="Whether to crop the images.")
-    parser.add_argument('--split_json_path', type=str, help="Path to the split json file.")
-    parser.add_argument('--checkpoint_path', type=str, help="Path to the checkpoint for resuming training.")
     args = parser.parse_args()
 
-    # Load and update config
     config = load_hyperparameters(args.config)
-    config = update_hyperparameters_with_args(config, args)
+    
+    if args.dataset:
+        config['dataset'] = args.dataset
 
-    # Train the model
     train(config)
 
 if __name__ == "__main__":
