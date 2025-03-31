@@ -109,7 +109,7 @@ def train(config):
     NB_EPOCH = config['epochs']
     WEIGHTS_PATH = config['weights_path']
     CHECKPOINT_PATH = config['checkpoint_path']
-    SAVE_BEST = config["model_checkpoint"]["filename_pattern"]
+    SAVE_BEST = config["callbacks"]["model_checkpoint"]["filename_pattern"]
     try:
         input_losses = load_loss_functions(config['loss_functions'])
         model_architecture = load_model_architecture(config['model_architecture'])
