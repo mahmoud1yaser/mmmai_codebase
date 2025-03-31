@@ -122,8 +122,13 @@ def train(config):
         train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
         
+        logging.info("Starting AdaMultiLossesNorm computation...")
         losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
         n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
+
+        logging.info(f"Number of losses: {n_loss}")
+        logging.info(f"Weights: {w_comb}")
+        logging.info(f"Biases: {b_comb}")
         
         def total_loss(y_true, y_pred):
             losses = [fn(y_true, y_pred) * w_comb[i] + b_comb[i] for i, fn in enumerate(input_losses)]
