@@ -38,7 +38,7 @@
       },
       "model_checkpoint": {
         "enabled": true,
-        "filename_pattern": "wat_stacked_unets_epoch-{epoch:02d}_val_loss-{val_loss:.4f}.h5"
+        "filename_pattern": "wat_stacked_unets_best_epoch-{epoch:02d}_val_loss-{val_loss:.4f}.h5"
       }
     }
   }
