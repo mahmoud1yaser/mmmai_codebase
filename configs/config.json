@@ -30,7 +30,7 @@
     "callbacks": {
       "csv_logger": {
         "enabled": true,
-        "filename": "_Loss_Acc.csv"
+        "filename": "_Training_Loss_Metrics.csv"
       },
       "reduce_lr": {
         "enabled": true,
