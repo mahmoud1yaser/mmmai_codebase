@@ -22,8 +22,8 @@ from networks.stacked_unets import StackedUNets
 from src.data.dataloader import DataLoader
 from src.utils.adaptive_losses import AdaMultiLossesNorm
 
-# Configure logging
-logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# # Configure logging
+# logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Initialize loss object
 loss_and_metric = Losses()
@@ -31,15 +31,15 @@ ada_multi_losses_norm = AdaMultiLossesNorm()
 
 def load_hyperparameters(config_path):
     """Load hyperparameters from a JSON configuration file."""
-    logging.info("Loading configuration file...")
+    print("Loading configuration file...")
     with open(config_path, 'r') as f:
         config = json.load(f)
-    logging.info("Hyperparameters loaded successfully.")
+    print("Hyperparameters loaded successfully.")
     return config
 
 def load_loss_functions(loss_function_names):
     """Load loss functions dynamically based on the names from the config."""
-    logging.info("Loading loss functions...")
+    print("Loading loss functions...")
     available_losses = {
         "ssim_loss": loss_and_metric.ssim_loss,
         "perceptual_loss": loss_and_metric.perceptual_loss,
@@ -53,19 +53,19 @@ def load_loss_functions(loss_function_names):
         else:
             raise ValueError(f"Loss function {loss_name} is not recognized.")
     
-    logging.info("Loss functions loaded successfully.")
+    print("Loss functions loaded successfully.")
     return losses
 
 def load_model_architecture(model_architecture_name):
     """Load model architecture dynamically based on the name from the config."""
-    logging.info(f"Loading model architecture: {model_architecture_name}...")
+    print(f"Loading model architecture: {model_architecture_name}...")
     available_models = {
         "stacked_unets": StackedUNets(),
         "wat_stacked_unets": WATStackedUNets()
     }
     
     if model_architecture_name in available_models:
-        logging.info(f"Model architecture '{model_architecture_name}' loaded successfully.")
+        print(f"Model architecture '{model_architecture_name}' loaded successfully.")
         return available_models[model_architecture_name]
     else:
         raise ValueError(f"Model '{model_architecture_name}' is not recognized.")
@@ -80,7 +80,7 @@ def exponential_lr(epoch, LEARNING_RATE):
     
 def load_data_loader(dataset_path, batch_size, data_ids, data_loader_config):
     """Load and split data using DataLoader based on configuration."""
-    logging.info("Initializing DataLoader...")
+    print("Initializing DataLoader...")
     try:
         data_loader = DataLoader(
             data_path=dataset_path,
@@ -92,7 +92,7 @@ def load_data_loader(dataset_path, batch_size, data_ids, data_loader_config):
             split_json_path=data_loader_config['split_json_path']
         )
         data_loader.split_data()
-        logging.info("DataLoader initialized and data split successfully.")
+        print("DataLoader initialized and data split successfully.")
         return data_loader
     except Exception as e:
         logging.error(f"Error loading data: {e}")
@@ -120,13 +120,13 @@ def train(config):
         train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
         
-        logging.info("Starting AdaMultiLossesNorm computation...")
+        print("Starting AdaMultiLossesNorm computation...")
         losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
         n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
 
-        logging.info(f"Number of losses: {n_loss}")
-        logging.info(f"Weights: {w_comb}")
-        logging.info(f"Biases: {b_comb}")
+        print(f"Number of losses: {n_loss}")
+        print(f"Weights: {w_comb}")
+        print(f"Biases: {b_comb}")
         
         def total_loss(y_true, y_pred):
             losses = [fn(y_true, y_pred) * w_comb[i] + b_comb[i] for i, fn in enumerate(input_losses)]
@@ -151,7 +151,7 @@ def train(config):
             TensorBoard(log_dir=log_dir)
         ]
 
-        logging.info("Starting model training...")
+        print("Starting model training...")
         model.fit(
             train_dataset,
             epochs=NB_EPOCH,
@@ -160,9 +160,9 @@ def train(config):
             initial_epoch=config["start_epoch"]
         )
         
-        logging.info("Training completed successfully.")
+        print("Training completed successfully.")
         
-        logging.info("Evaluating model on test dataset...")
+        print("Evaluating model on test dataset...")
         test_dataset = data_loader.generator('test')
         model.evaluate(test_dataset)
     except Exception as e:
