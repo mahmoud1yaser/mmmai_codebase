@@ -99,9 +99,7 @@ def load_data_loader(dataset_path, batch_size, data_ids, data_loader_config):
         raise
 
 def train(config):
-    """Train the model."""
-    logging.info('Starting model training...')
-    
+    """Train the model."""    
     HEIGHT = config['height']
     WIDTH = config['width']
     LEARNING_RATE = config['learning_rate']
@@ -153,18 +151,20 @@ def train(config):
             TensorBoard(log_dir=log_dir)
         ]
 
+        logging.info("Starting model training...")
         model.fit(
             train_dataset,
             epochs=NB_EPOCH,
             validation_data=validation_dataset,
-            callbacks=callbacks
+            callbacks=callbacks,
+            initial_epoch=config["start_epoch"]
         )
         
         logging.info("Training completed successfully.")
         
+        logging.info("Evaluating model on test dataset...")
         test_dataset = data_loader.generator('test')
         model.evaluate(test_dataset)
-        
     except Exception as e:
         logging.error(f"Error during model training: {e}")
 
