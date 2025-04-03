@@ -119,6 +119,9 @@ def train(config):
     CHECKPOINT_PATH = config['checkpoint_path']
     SAVE_BEST = config["callbacks"]["model_checkpoint"]["filename_pattern"]
     START_EPOCH = config["start_epoch"]
+
+    # Create weights directory if it doesn't exist
+    os.makedirs(os.path.dirname(WEIGHTS_PATH), exist_ok=True)
     
     # Setup logging
     log_dir = os.path.join(WEIGHTS_PATH, "logs")
