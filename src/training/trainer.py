@@ -2,7 +2,7 @@ import sys
 import os
 
 # Comment out the following line if you want to run the code in a different environment than Kaggle
-sys.path.append("C:/Users/mahmo/Desktop/mmmai_codebase")
+sys.path.append(".")
 
 import math
 import argparse
@@ -22,24 +22,35 @@ from networks.stacked_unets import StackedUNets
 from src.data.dataloader import DataLoader
 from src.utils.adaptive_losses import AdaMultiLossesNorm
 
-def setup_logging(log_dir):
-    """Setup logging configuration"""
-    os.makedirs(log_dir, exist_ok=True)
-    log_file = os.path.join(log_dir, 'log_file.txt')
-    
-    # Configure logging with both file and console handlers
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler(sys.stdout)
-        ]
-    )
-
 # Initialize loss object
 loss_and_metric = Losses()
 ada_multi_losses_norm = AdaMultiLossesNorm()
+
+def setup_logging(log_dir):
+    """Set up logging to file and console."""
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, 'training.log')
+    
+    # Get the root logger
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    
+    # Remove any existing handlers to avoid duplication
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+    
+    # Create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    
+    # Create file handler and add it to logger
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+    
+    # Create console handler and add it to logger
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setFormatter(formatter)
+    logger.addHandler(console_handler)
 
 def load_hyperparameters(config_path):
     """Load hyperparameters from a JSON configuration file."""
@@ -144,9 +155,14 @@ def train(config):
         validation_dataset = data_loader.generator('validation')
         
         logging.info("Starting AdaMultiLossesNorm computation...")
-        losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
-        n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
-
+        if len(input_losses) > 1:
+            losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
+            n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
+        else:
+            n_loss = 1
+            w_comb = [1.0]
+            b_comb = [0.0]
+            
         logging.info(f"Number of losses: {n_loss}")
         logging.info(f"Weights: {w_comb}")
         logging.info(f"Biases: {b_comb}")

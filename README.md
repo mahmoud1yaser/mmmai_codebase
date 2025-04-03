@@ -29,6 +29,7 @@ To train the model, follow the steps below:
      "batch_size": 10,  # Batch size for training
      "enable_SAP": true, # set enable_SAP = false if using other generative models
      "start_epoch":0, # set only in case checkpoint_path is given
+     "weights_path": "trained_models/", # output folder path
 
    }
    ```
