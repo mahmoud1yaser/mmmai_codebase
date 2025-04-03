@@ -27,7 +27,9 @@ To train the model, follow the steps below:
      "checkpoint_path": null,  # Optional: Provide the path to a checkpoint if resuming training
      "epochs": 10,  # Number of epochs for training
      "batch_size": 10,  # Batch size for training
-     "enable_SAP": true # set enable_SAP = false if using other generative models
+     "enable_SAP": true, # set enable_SAP = false if using other generative models
+     "start_epoch":0, # set only in case checkpoint_path is given
+
    }
    ```
 
@@ -66,7 +68,7 @@ To add a new network to the training pipeline:
    ```
 
 3. **Update Configuration**:
-   - Edit `configs/hyperparameters.json` to include your new network under the `model_architecture` key.
+   - Edit `configs/config.json` to include your new network under the `model_architecture` key.
 
 ---
 
@@ -100,7 +102,7 @@ To add a new loss function:
    ```
 
 3. **Update Configuration**:
-   - Edit `configs/hyperparameters.json` and add your new loss to the `loss_functions` list:
+   - Edit `configs/config.json` and add your new loss to the `loss_functions` list:
 
    ```json
    "loss_functions": [
@@ -117,7 +119,7 @@ To add a new loss function:
 1. Once the configuration is set and any custom networks or losses are added, run the training script:
 
    ```bash
-   python src/training/trainer.py --config configs/hyperparameters.json
+   python src/training/trainer.py --config configs/config.json
    ```
 
 2. The script will automatically load the dataset, model, and loss functions from the configuration file and begin training.
