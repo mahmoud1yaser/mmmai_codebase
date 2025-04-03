@@ -67,7 +67,7 @@ python -m pip install --upgrade pip
 
 ### 3. **Install Required Packages**
 
-Install TensorFlow, NumPy, and Pandas:
+Install Packages:
 
 ```bash
 pip install -r requirements.txt

@@ -1,9 +1,6 @@
+sys.path.append(".")
 import sys
 import os
-
-# Comment out the following line if you want to run the code in a different environment than Kaggle
-sys.path.append(".")
-
 import math
 import argparse
 import tensorflow as tf
@@ -162,7 +159,7 @@ def train(config):
             n_loss = 1
             w_comb = [1.0]
             b_comb = [0.0]
-            
+
         logging.info(f"Number of losses: {n_loss}")
         logging.info(f"Weights: {w_comb}")
         logging.info(f"Biases: {b_comb}")
