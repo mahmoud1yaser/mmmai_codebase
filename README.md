@@ -1,6 +1,3 @@
-add those in readme:
-
-```
 # mmmai_codebase
 
 ## Overview
@@ -42,6 +39,57 @@ To train the model, follow the steps below:
    - **Loss Functions**: Choose from the implemented loss functions. You can also add new ones in the `utils/losses.py` file.
    - **Model Architecture**: Select the model architecture to train (currently supports `wat_stacked_unets` and `stacked_unets`).
    - **Epochs and Batch Size**: Adjust the number of epochs and batch size for training according to your hardware and task.
+
+---
+
+Here's the **Setting Up Environment** section separated out for your README:
+
+---
+
+## Setting Up Environment
+
+### 1. **Create and Activate Virtual Environment**
+
+To create a virtual environment, run the following command:
+
+```bash
+python -m venv myenv
+```
+
+Activate the virtual environment:
+
+- On **Linux/Mac**:
+  ```bash
+  source myenv/bin/activate
+  ```
+- On **Windows**:
+  ```bash
+  .\myenv\Scripts\activate
+  ```
+
+### 2. **Upgrade pip**
+
+Upgrade `pip` to ensure you're using the latest version:
+
+```bash
+pip install --upgrade pip
+```
+
+### 3. **Install Required Packages**
+
+Install TensorFlow, NumPy, and Pandas:
+
+```bash
+pip install tensorflow==2.15.0 numpy pandas
+```
+
+### 4. **Verify the Installation**
+
+To verify that the necessary packages are installed and check the TensorFlow version, use the following Python script:
+
+```python
+python -m tensorflow -c "import tensorflow as tf; import numpy as np; import pandas as pd; import os; print('TensorFlow version:', tf.__version__); print('Num GPUs Available: ', len(tf.config.list_physical_devices('GPU')))"
+```
 
 ---
 
@@ -177,4 +225,3 @@ Using Kaggle, you can't access localhost, so that we can use ngrok
 - **Checkpointing**: You can specify a `checkpoint_path` to resume training from a previously saved model.
 - **Callbacks**: The training script supports several callbacks including CSV logging, learning rate scheduling, model checkpointing, and TensorBoard integration.
 - **Dataset Paths**: Ensure the dataset paths in the `data_ids` section are correct for your environment. For example, when running on Kaggle, use the appropriate dataset input paths.
-```
