@@ -22,8 +22,20 @@ from networks.stacked_unets import StackedUNets
 from src.data.dataloader import DataLoader
 from src.utils.adaptive_losses import AdaMultiLossesNorm
 
-# # Configure logging
-# logging.basicConfig(stream=sys.stdout, level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+def setup_logging(log_dir):
+    """Setup logging configuration"""
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, 'log_file.txt')
+    
+    # Configure logging with both file and console handlers
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s',
+        handlers=[
+            logging.FileHandler(log_file),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
 
 # Initialize loss object
 loss_and_metric = Losses()
@@ -31,15 +43,14 @@ ada_multi_losses_norm = AdaMultiLossesNorm()
 
 def load_hyperparameters(config_path):
     """Load hyperparameters from a JSON configuration file."""
-    print("Loading configuration file...")
+    logging.info("Loading configuration file...")
     with open(config_path, 'r') as f:
         config = json.load(f)
-    print("Hyperparameters loaded successfully.")
+    logging.info("Hyperparameters loaded successfully.")
     return config
 
 def load_loss_functions(loss_function_names):
     """Load loss functions dynamically based on the names from the config."""
-    print("Loading loss functions...")
     available_losses = {
         "ssim_loss": loss_and_metric.ssim_loss,
         "perceptual_loss": loss_and_metric.perceptual_loss,
@@ -53,19 +64,18 @@ def load_loss_functions(loss_function_names):
         else:
             raise ValueError(f"Loss function {loss_name} is not recognized.")
     
-    print("Loss functions loaded successfully.")
+    logging.info("Loss functions loaded successfully.")
     return losses
 
 def load_model_architecture(model_architecture_name):
     """Load model architecture dynamically based on the name from the config."""
-    print(f"Loading model architecture: {model_architecture_name}...")
     available_models = {
         "stacked_unets": StackedUNets(),
         "wat_stacked_unets": WATStackedUNets()
     }
     
     if model_architecture_name in available_models:
-        print(f"Model architecture '{model_architecture_name}' loaded successfully.")
+        logging.info(f"Model architecture '{model_architecture_name}' loaded successfully.")
         return available_models[model_architecture_name]
     else:
         raise ValueError(f"Model '{model_architecture_name}' is not recognized.")
@@ -108,25 +118,35 @@ def train(config):
     WEIGHTS_PATH = config['weights_path']
     CHECKPOINT_PATH = config['checkpoint_path']
     SAVE_BEST = config["callbacks"]["model_checkpoint"]["filename_pattern"]
+    START_EPOCH = config["start_epoch"]
+    
+    # Setup logging
+    log_dir = os.path.join(WEIGHTS_PATH, "logs")
+    setup_logging(log_dir)
+    
     try:
+        logging.info("Loading loss functions...")
         input_losses = load_loss_functions(config['loss_functions'])
+        
+        logging.info(f"Loading model architecture: {config['model_architecture']}...")
         model_architecture = load_model_architecture(config['model_architecture'])
         
         model = model_architecture.Correction_Multi_input(HEIGHT, WIDTH)
         
+        logging.info("Initializing DataLoader...")
         data_loader_config = config['data_loader']
         data_loader = load_data_loader(config['dataset'], BATCH_SIZE, config['data_ids'], data_loader_config)
         
         train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
         
-        print("Starting AdaMultiLossesNorm computation...")
+        logging.info("Starting AdaMultiLossesNorm computation...")
         losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
         n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
 
-        print(f"Number of losses: {n_loss}")
-        print(f"Weights: {w_comb}")
-        print(f"Biases: {b_comb}")
+        logging.info(f"Number of losses: {n_loss}")
+        logging.info(f"Weights: {w_comb}")
+        logging.info(f"Biases: {b_comb}")
         
         def total_loss(y_true, y_pred):
             losses = [fn(y_true, y_pred) * w_comb[i] + b_comb[i] for i, fn in enumerate(input_losses)]
@@ -139,11 +159,12 @@ def train(config):
         )
 
         if CHECKPOINT_PATH:
+            logging.info(f"Loading checkpoint from {CHECKPOINT_PATH}")
             model = load_model(CHECKPOINT_PATH, custom_objects={'total_loss': total_loss})
-
-        log_dir = os.path.join(WEIGHTS_PATH, "logs")
-        os.makedirs(log_dir, exist_ok=True)
-        
+        else:
+            START_EPOCH = 0
+            logging.info("No checkpoint provided, starting from scratch.")
+            
         callbacks = [
             CSVLogger(f'{WEIGHTS_PATH}_Loss_Acc.csv'),
             LearningRateScheduler(lambda epoch: exponential_lr(epoch, LEARNING_RATE)),
@@ -151,22 +172,24 @@ def train(config):
             TensorBoard(log_dir=log_dir)
         ]
 
-        print("Starting model training...")
+        logging.info("Starting model training...")
         model.fit(
             train_dataset,
             epochs=NB_EPOCH,
             validation_data=validation_dataset,
             callbacks=callbacks,
-            initial_epoch=config["start_epoch"]
+            initial_epoch=START_EPOCH
         )
         
-        print("Training completed successfully.")
+        logging.info("Training completed successfully.")
         
-        print("Evaluating model on test dataset...")
+        logging.info("Evaluating model on test dataset...")
         test_dataset = data_loader.generator('test')
         model.evaluate(test_dataset)
+        
     except Exception as e:
         logging.error(f"Error during model training: {e}")
+        raise
 
 def main():
     """Main function to parse arguments and execute training."""
