@@ -26,7 +26,7 @@
       "crop": false,
       "split_json_path": null
     },
-    "weights_path": "/kaggle/working/",
+    "weights_path": "trained_models/",
     "callbacks": {
       "csv_logger": {
         "enabled": true,
