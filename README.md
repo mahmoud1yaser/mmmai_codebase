@@ -1,3 +1,6 @@
+add those in readme:
+
+```
 # mmmai_codebase
 
 ## Overview
@@ -174,3 +177,4 @@ Using Kaggle, you can't access localhost, so that we can use ngrok
 - **Checkpointing**: You can specify a `checkpoint_path` to resume training from a previously saved model.
 - **Callbacks**: The training script supports several callbacks including CSV logging, learning rate scheduling, model checkpointing, and TensorBoard integration.
 - **Dataset Paths**: Ensure the dataset paths in the `data_ids` section are correct for your environment. For example, when running on Kaggle, use the appropriate dataset input paths.
+```
