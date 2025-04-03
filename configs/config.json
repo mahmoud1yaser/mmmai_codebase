@@ -19,7 +19,7 @@
     "learning_rate": 0.001,
     "height": 256,
     "width": 256,
-    "token":"2uuou6iTpP5tFnIjF3KZjJ4e5sm_58r6P5rmD9ohT8WYS24bP",
+    "token":"your_ngrok_token_here",
     "data_loader": {
       "split_ratio": [0.7, 0.2, 0.1],
       "view": "Axial",
