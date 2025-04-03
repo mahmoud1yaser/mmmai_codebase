@@ -2,7 +2,7 @@ import sys
 import os
 
 # Comment out the following line if you want to run the code in a different environment than Kaggle
-sys.path.append("/kaggle/working/mmmai_codebase/")
+sys.path.append("C:/Users/mahmo/Desktop/mmmai_codebase")
 
 import math
 import argparse

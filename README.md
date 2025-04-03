@@ -69,7 +69,7 @@ python -m pip install --upgrade pip
 Install TensorFlow, NumPy, and Pandas:
 
 ```bash
-pip install tensorflow==2.15.0 numpy pandas
+pip install -r requirements.txt
 ```
 
 ### 4. **Verify the Installation**
