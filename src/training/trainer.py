@@ -32,19 +32,10 @@ def setup_logging(log_dir):
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
         handlers=[
-            # Use mode='w' to overwrite file at start, buffering=1 for line buffering
-            logging.FileHandler(log_file, mode='w', encoding='utf-8', delay=False),
+            logging.FileHandler(log_file),
             logging.StreamHandler(sys.stdout)
         ]
     )
-    
-    # Get the root logger and set all handlers to flush after each log
-    root_logger = logging.getLogger()
-    for handler in root_logger.handlers:
-        handler.flush = True
-        if isinstance(handler, logging.FileHandler):
-            # Ensure file handler flushes immediately
-            handler.stream.flush = lambda: handler.stream.buffer.flush()
 
 # Initialize loss object
 loss_and_metric = Losses()
