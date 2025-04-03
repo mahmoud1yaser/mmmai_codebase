@@ -42,10 +42,6 @@ To train the model, follow the steps below:
 
 ---
 
-Here's the **Setting Up Environment** section separated out for your README:
-
----
-
 ## Setting Up Environment
 
 ### 1. **Create and Activate Virtual Environment**
