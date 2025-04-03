@@ -44,31 +44,24 @@ To train the model, follow the steps below:
 
 ## Setting Up Environment
 
-### 1. **Create and Activate Virtual Environment**
+### 1. **Create and Activate Conda Environment**
 
-To create a virtual environment, run the following command:
+To create a Conda environment with Python 3.10.12, run the following command:
 
 ```bash
-python -m venv myenv
+conda create -n myenv python=3.10.12
 ```
 
-Activate the virtual environment:
-
-- On **Linux/Mac**:
-  ```bash
-  source myenv/bin/activate
-  ```
-- On **Windows**:
-  ```bash
-  .\myenv\Scripts\activate
-  ```
-
-### 2. **Upgrade pip**
-
-Upgrade `pip` to ensure you're using the latest version:
+Activate the environment:
 
 ```bash
-pip install --upgrade pip
+conda activate myenv
+```
+
+### 2. **Upgrade pip** (Optional but recommended)
+
+```bash
+python -m pip install --upgrade pip
 ```
 
 ### 3. **Install Required Packages**
@@ -81,10 +74,10 @@ pip install tensorflow==2.15.0 numpy pandas
 
 ### 4. **Verify the Installation**
 
-To verify that the necessary packages are installed and check the TensorFlow version, use the following Python script:
+Run the following command to verify your installations:
 
-```python
-python -m tensorflow -c "import tensorflow as tf; import numpy as np; import pandas as pd; import os; print('TensorFlow version:', tf.__version__); print('Num GPUs Available: ', len(tf.config.list_physical_devices('GPU')))"
+```bash
+python -c "import tensorflow as tf; import numpy as np; import pandas as pd; import os; print('TensorFlow version:', tf.__version__); print('Num GPUs Available: ', len(tf.config.list_physical_devices('GPU')))"
 ```
 
 ---

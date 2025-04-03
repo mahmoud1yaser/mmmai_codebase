@@ -1,8 +1,8 @@
 {
-    "dataset": "/kaggle/input/brats-motion-data/new_Brats_motion_data",
+    "dataset": "d:/CU/GP/MR-ART-Regist",
     "data_ids": {
       "/kaggle/input/mmmai-simulated-data/ds004795-download": "Motion_Simulated",
-      "/kaggle/input/mmmai-regist-data/MR-ART-Regist": "Motion",
+      "d:/CU/GP/MR-ART-Regist": "Motion",
       "/kaggle/input/brats-motion-data/new_Brats_motion_data": "BraTS"
     },
     "loss_functions": [
