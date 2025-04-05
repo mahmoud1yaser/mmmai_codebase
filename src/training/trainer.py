@@ -1,4 +1,4 @@
-sys.path.append(".")
+sys.path.append("/kaggle/working/")
 import sys
 import os
 import math
