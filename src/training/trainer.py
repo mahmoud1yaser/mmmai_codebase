@@ -1,5 +1,5 @@
-sys.path.append("/kaggle/working/")
 import sys
+sys.path.append("/kaggle/working/")
 import os
 import math
 import argparse
