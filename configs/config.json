@@ -1,8 +1,8 @@
 {
-    "dataset": "/kaggle/input/brats-motion-data/new_Brats_motion_data",
+    "dataset": "d:/CU/GP/MR-ART-Regist",
     "data_ids": {
       "/kaggle/input/mmmai-simulated-data/ds004795-download": "Motion_Simulated",
-      "/kaggle/input/mmmai-regist-data/MR-ART-Regist": "Motion",
+      "d:/CU/GP/MR-ART-Regist": "Motion",
       "/kaggle/input/brats-motion-data/new_Brats_motion_data": "BraTS"
     },
     "loss_functions": [
@@ -19,18 +19,18 @@
     "learning_rate": 0.001,
     "height": 256,
     "width": 256,
-    "token":"2uuou6iTpP5tFnIjF3KZjJ4e5sm_58r6P5rmD9ohT8WYS24bP",
+    "token":"your_ngrok_token_here",
     "data_loader": {
       "split_ratio": [0.7, 0.2, 0.1],
       "view": "Axial",
       "crop": false,
       "split_json_path": null
     },
-    "weights_path": "/kaggle/working/",
+    "weights_path": "trained_models/",
     "callbacks": {
       "csv_logger": {
         "enabled": true,
-        "filename": "_Loss_Acc.csv"
+        "filename": "_Training_Loss_Metrics.csv"
       },
       "reduce_lr": {
         "enabled": true,

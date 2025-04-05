@@ -27,7 +27,10 @@ To train the model, follow the steps below:
      "checkpoint_path": null,  # Optional: Provide the path to a checkpoint if resuming training
      "epochs": 10,  # Number of epochs for training
      "batch_size": 10,  # Batch size for training
-     "enable_SAP": true # set enable_SAP = false if using other generative models
+     "enable_SAP": true, # set enable_SAP = false if using other generative models
+     "start_epoch":0, # set only in case checkpoint_path is given
+     "weights_path": "trained_models/", # output folder path
+
    }
    ```
 
@@ -37,6 +40,46 @@ To train the model, follow the steps below:
    - **Loss Functions**: Choose from the implemented loss functions. You can also add new ones in the `utils/losses.py` file.
    - **Model Architecture**: Select the model architecture to train (currently supports `wat_stacked_unets` and `stacked_unets`).
    - **Epochs and Batch Size**: Adjust the number of epochs and batch size for training according to your hardware and task.
+
+---
+
+## Setting Up Environment
+
+### 1. **Create and Activate Conda Environment**
+
+To create a Conda environment with Python 3.10.12, run the following command:
+
+```bash
+conda create -n myenv python=3.10.12
+```
+
+Activate the environment:
+
+```bash
+conda activate myenv
+```
+
+### 2. **Upgrade pip** (Optional but recommended)
+
+```bash
+python -m pip install --upgrade pip
+```
+
+### 3. **Install Required Packages**
+
+Install Packages:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. **Verify the Installation**
+
+Run the following command to verify your installations:
+
+```bash
+python -c "import tensorflow as tf; import numpy as np; import pandas as pd; import os; print('TensorFlow version:', tf.__version__); print('Num GPUs Available: ', len(tf.config.list_physical_devices('GPU')))"
+```
 
 ---
 
@@ -66,7 +109,7 @@ To add a new network to the training pipeline:
    ```
 
 3. **Update Configuration**:
-   - Edit `configs/hyperparameters.json` to include your new network under the `model_architecture` key.
+   - Edit `configs/config.json` to include your new network under the `model_architecture` key.
 
 ---
 
@@ -100,7 +143,7 @@ To add a new loss function:
    ```
 
 3. **Update Configuration**:
-   - Edit `configs/hyperparameters.json` and add your new loss to the `loss_functions` list:
+   - Edit `configs/config.json` and add your new loss to the `loss_functions` list:
 
    ```json
    "loss_functions": [
@@ -117,7 +160,7 @@ To add a new loss function:
 1. Once the configuration is set and any custom networks or losses are added, run the training script:
 
    ```bash
-   python src/training/trainer.py --config configs/hyperparameters.json
+   python src/training/trainer.py --config configs/config.json
    ```
 
 2. The script will automatically load the dataset, model, and loss functions from the configuration file and begin training.
