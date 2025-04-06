@@ -152,12 +152,13 @@ def train(config):
         train_dataset = data_loader.generator('train', enable_SAP=config['enable_SAP'])
         validation_dataset = data_loader.generator('validation')
         
-        logging.info("Starting AdaMultiLossesNorm computation...")
         if len(input_losses) > 1:
             if not SKIP_AMLN:
+                logging.info("Starting AdaMultiLossesNorm computation...")
                 losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
                 n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
             else:
+                logging.info("Skipping AdaMultiLossesNorm computation.")
                 n_loss = len(input_losses)
                 w_comb = [1.0] * n_loss
                 b_comb = [0.0] * n_loss
