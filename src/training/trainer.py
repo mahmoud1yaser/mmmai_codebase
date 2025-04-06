@@ -1,5 +1,5 @@
-sys.path.append(".")
 import sys
+sys.path.append("/kaggle/working/mmmai_codebase/")
 import os
 import math
 import argparse
