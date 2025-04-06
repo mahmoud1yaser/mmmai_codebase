@@ -50,7 +50,7 @@ To train the model, follow the steps below:
 To create a Conda environment with Python 3.10.12, run the following command:
 
 ```bash
-conda create -n myenv python=3.10.12
+conda create -n myenv python=3.10.12 # if 3.10.13, try grpcio==1.67.0 and h5py==3.12.0
 ```
 
 Activate the environment:
