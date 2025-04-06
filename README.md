@@ -30,6 +30,7 @@ To train the model, follow the steps below:
      "enable_SAP": true, # set enable_SAP = false if using other generative models
      "start_epoch":0, # set only in case checkpoint_path is given
      "weights_path": "trained_models/", # output folder path
+     "skip_ada_multi_losses_norm": false, # skip AMLN
 
    }
    ```
@@ -50,7 +51,7 @@ To train the model, follow the steps below:
 To create a Conda environment with Python 3.10.12, run the following command:
 
 ```bash
-conda create -n myenv python=3.10.12 # if 3.10.13, try grpcio==1.67.0 and h5py==3.12.0
+conda create -n myenv python=3.10.12 # if using 3.10.13, try grpcio==1.67.0; h5py==3.12.0; scipy==1.15.1; ml-dtypes==0.3.1; tensorflow==2.15.1; remove tensorflow-estimator and tensorflow-intel.
 ```
 
 Activate the environment:

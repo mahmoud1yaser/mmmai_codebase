@@ -127,6 +127,7 @@ def train(config):
     CHECKPOINT_PATH = config['checkpoint_path']
     SAVE_BEST = config["callbacks"]["model_checkpoint"]["filename_pattern"]
     START_EPOCH = config["start_epoch"]
+    SKIP_AMLN = config["skip_adaptive_multi_losses_norm"]
 
     # Create weights directory if it doesn't exist
     os.makedirs(os.path.dirname(WEIGHTS_PATH), exist_ok=True)
@@ -153,8 +154,13 @@ def train(config):
         
         logging.info("Starting AdaMultiLossesNorm computation...")
         if len(input_losses) > 1:
-            losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
-            n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
+            if not SKIP_AMLN:
+                losses = ada_multi_losses_norm.compute_losses(train_dataset, BATCH_SIZE, *input_losses)
+                n_loss, w_comb, b_comb = ada_multi_losses_norm.compute_normalized_weights_and_biases(*losses)
+            else:
+                n_loss = len(input_losses)
+                w_comb = [1.0] * n_loss
+                b_comb = [0.0] * n_loss
         else:
             n_loss = 1
             w_comb = [1.0]
