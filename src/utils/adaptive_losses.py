@@ -21,7 +21,12 @@ class AdaMultiLossesNorm:
         losses = []
         
         if dataset is not None:
-            for (_, motion, _), free in tqdm(dataset):
+            for motion_data, free in tqdm(dataset):
+                if isinstance(motion_data, tuple) and len(motion_data) == 3:
+                    _, motion, _ = motion_data
+                else:
+                    motion = motion_data if not isinstance(motion_data, tuple) else motion_data[0]
+
                 if free.shape[0] != batch_size or motion.shape[0] != batch_size:
                     print(f"Wrong shape detected free shape = {free.shape} while motion shape = {motion.shape}")
                     continue

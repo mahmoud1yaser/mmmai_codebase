@@ -210,7 +210,7 @@ class DataLoader:
                                         )
                                     else:
                                         yield (
-                                            motion_slice,
+                                            (motion_slice),
                                             free_slice
                                         )
                 else:
@@ -280,7 +280,7 @@ class DataLoader:
                                         )
                                     else:
                                         yield (
-                                            motion_slice,
+                                            (motion_slice),
                                             free_slice
                                         )
 
