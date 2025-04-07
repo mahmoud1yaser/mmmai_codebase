@@ -16,6 +16,7 @@ from tensorflow.keras import backend as K
 from src.utils.losses import Losses 
 from networks.wat_stacked_unets import WATStackedUNets
 from networks.stacked_unets import StackedUNets
+from networks.wat_unet import WATUNet
 from src.data.dataloader import DataLoader
 from src.utils.adaptive_losses import AdaMultiLossesNorm
 
@@ -79,7 +80,8 @@ def load_model_architecture(model_architecture_name):
     """Load model architecture dynamically based on the name from the config."""
     available_models = {
         "stacked_unets": StackedUNets(),
-        "wat_stacked_unets": WATStackedUNets()
+        "wat_stacked_unets": WATStackedUNets(),
+        "wat_unet": WATUNet(),
     }
     
     if model_architecture_name in available_models:
