@@ -183,7 +183,7 @@ def train(config):
             metrics=[loss_and_metric.ssim_score, 'mse', loss_and_metric.psnr],
             run_eagerly=True
         )
-
+        tf.config.run_functions_eagerly(True)
         if CHECKPOINT_PATH:
             logging.info(f"Loading checkpoint from {CHECKPOINT_PATH}")
             model = load_model(CHECKPOINT_PATH, custom_objects={'total_loss': total_loss})
