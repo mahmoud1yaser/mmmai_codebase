@@ -180,7 +180,8 @@ def train(config):
         model.compile(
             loss=total_loss,
             optimizer=Adam(learning_rate=LEARNING_RATE),
-            metrics=[loss_and_metric.ssim_score, 'mse', loss_and_metric.psnr]
+            metrics=[loss_and_metric.ssim_score, 'mse', loss_and_metric.psnr],
+            run_eagerly=True
         )
 
         if CHECKPOINT_PATH:
