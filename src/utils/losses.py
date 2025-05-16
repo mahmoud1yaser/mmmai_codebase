@@ -60,20 +60,20 @@ class Losses():
         # Extract perceptual models
         perceptual_model_conv1, perceptual_model_conv2, perceptual_model_conv3 = self.perceptual_models
 
-        y_true = tf.cast(y_true, tf.float32)
-        y_pred = tf.cast(y_pred, tf.float32)
+        # y_true = tf.cast(y_true, tf.float32)
+        # y_pred = tf.cast(y_pred, tf.float32)
     
-        # Ensure channel dimension
-        if tf.rank(y_true) == 3:
-            y_true = tf.expand_dims(y_true, -1)
-        if tf.rank(y_pred) == 3:
-            y_pred = tf.expand_dims(y_pred, -1)
+        # # Ensure channel dimension
+        # if tf.rank(y_true) == 3:
+        #     y_true = tf.expand_dims(y_true, -1)
+        # if tf.rank(y_pred) == 3:
+        #     y_pred = tf.expand_dims(y_pred, -1)
 
-        tf.debugging.assert_equal(
-            tf.shape(y_true),
-            tf.shape(y_pred),
-            message=f"SSIM input shape mismatch: {y_true.shape} vs {y_pred.shape}"
-        )
+        # tf.debugging.assert_equal(
+        #     tf.shape(y_true),
+        #     tf.shape(y_pred),
+        #     message=f"Perceptual input shape mismatch: {y_true.shape} vs {y_pred.shape}"
+        # )
 
         # Convert single-channel images to RGB
         y_true_rgb = tf.repeat(y_true, 3, axis=-1)
