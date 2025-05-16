@@ -1,5 +1,6 @@
 import sys
 sys.path.append("/kaggle/working/mmmai_codebase/")
+# sys.path.append("C:/Users/mahmo/Desktop/mmmai_codebase")
 import os
 import math
 import argparse
@@ -142,11 +143,6 @@ def train(config):
         logging.info("Loading loss functions...")
         input_losses = load_loss_functions(config['loss_functions'])
         
-        logging.info(f"Loading model architecture: {config['model_architecture']}...")
-        model_architecture = load_model_architecture(config['model_architecture'])
-        
-        model = model_architecture.Correction_Multi_input(HEIGHT, WIDTH)
-        
         logging.info("Initializing DataLoader...")
         data_loader_config = config['data_loader']
         data_loader = load_data_loader(config['dataset'], BATCH_SIZE, config['data_ids'], data_loader_config)
@@ -176,6 +172,11 @@ def train(config):
         def total_loss(y_true, y_pred):
             losses = [fn(y_true, y_pred) * w_comb[i] + b_comb[i] for i, fn in enumerate(input_losses)]
             return sum(losses) / n_loss
+
+        logging.info(f"Loading model architecture: {config['model_architecture']}...")
+        model_architecture = load_model_architecture(config['model_architecture'])
+        
+        model = model_architecture.Correction_Multi_input(HEIGHT, WIDTH)
 
         model.compile(
             loss=total_loss,
