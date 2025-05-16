@@ -89,15 +89,34 @@ class Losses():
 
         return total_loss
 
-    def ssim_loss(self,y_true,y_pred):
-        score = tf.image.ssim(
-        y_true,
-        y_pred,
-        max_val=1.0
-        )
+    # def ssim_loss(self,y_true,y_pred):
+    #     score = tf.image.ssim(
+    #     y_true,
+    #     y_pred,
+    #     max_val=1.0
+    #     )
         
-        loss = (1-score)/2
-        return loss
+    #     loss = (1-score)/2
+    #     return loss
+
+    def ssim_loss(self, y_true, y_pred, max_val=1.0):
+        y_true = tf.cast(y_true, tf.float32)
+        y_pred = tf.cast(y_pred, tf.float32)
+    
+        # Ensure channel dimension
+        if tf.rank(y_true) == 3:
+            y_true = tf.expand_dims(y_true, -1)
+        if tf.rank(y_pred) == 3:
+            y_pred = tf.expand_dims(y_pred, -1)
+    
+        tf.debugging.assert_equal(
+            tf.shape(y_true),
+            tf.shape(y_pred),
+            message=f"SSIM input shape mismatch: {y_true.shape} vs {y_pred.shape}"
+        )
+    
+        ssim_score = tf.image.ssim(y_true, y_pred, max_val=max_val)
+        return tf.reduce_mean((1 - ssim_score) / 2.0)
     
     def mae_loss(self, y_true, y_pred):
         """MAE Loss: Computes the mean absolute error between the true and predicted images."""
